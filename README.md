@@ -16,15 +16,26 @@ Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Li
 - **Timer** for keyword coloring
 
 ---
+## Requirements
+**Java** : 17 or higher
+
+**Kotlin** : Installed and available via `kotlinc` (make sure it is in `$PATH`)
+
+**Swift** : Installed and available via `/usr/bin/env swift`
 
 ## Building and Running
 
-### Build
-IntelliJ IDEA:
+### IntelliJ IDEA:
 1. Open the project
 2. Mark `src/` as **Sources Root**
 3. Mark `resources/` as **Resources Root**
-4. Build → *Rebuild Project*
+4. Open ->  `src/main/java/ScriptRunner.java`
+5. Click -> **Run** in the top-right corner
+
+The KotlinAndSwiftScriptRunner window should appear.
+
+Select the language (Kotlin/Swift), type in the script, and click **Run**
+
 
 ### Example Swift Script
 
