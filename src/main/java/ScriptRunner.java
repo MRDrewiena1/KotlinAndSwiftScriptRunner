@@ -1,3 +1,5 @@
+package main.java;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -18,9 +20,10 @@ public class ScriptRunner extends JFrame {
      private final JButton runButton = new JButton("Run");
      private final JButton stopButton = new JButton("Stop");
      private final JLabel statusLabel = new JLabel("Idle");
-     private final JLabel exitLabel = new JLabel("Exit");
+     private final JLabel exitLabel = new JLabel("Exit Code: ");
 
      private Process runningProcess;
+     private Timer highlightTimer;
 
      private final List<String> kotlinKeywords = List.of("func","let","var","if","else","for","while","return","class","import");
      private final List<String> swiftKeywords = List.of("fun","val","var","if","else","for","while","return","class","import");
@@ -29,9 +32,9 @@ public class ScriptRunner extends JFrame {
          super("KotlinAndSwiftScriptRunner");
 
          setLayout(new BorderLayout());
-         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                  new JScrollPane(editor),new JScrollPane(output));
-         splitPane.setDividerLocation(0.5);
+         splitPane.setDividerLocation(450);
          add(splitPane, BorderLayout.CENTER);
 
          JPanel topControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -45,6 +48,7 @@ public class ScriptRunner extends JFrame {
 
          output.setEditable(false);
          loadCustomFont();
+         setupHighlighter();
 
          runButton.addActionListener(e -> runScript());
          stopButton.addActionListener(e -> stopScript());
@@ -77,7 +81,7 @@ public class ScriptRunner extends JFrame {
              runningProcess = pb.start();
 
              statusLabel.setText("Running...");
-             exitLabel.setText("Exit: -");
+             exitLabel.setText("Exit Code: -");
              exitLabel.setForeground(Color.BLACK);
              output.setText("");
 
@@ -136,13 +140,13 @@ public class ScriptRunner extends JFrame {
                  List<String> keywords = langSelect.getSelectedItem()
                          .equals("Kotlin") ? kotlinKeywords : swiftKeywords;
                  String text = editor.getText(0,document.getLength());
-                 for (String word : keywords) {
-                     int i =  text.indexOf(word);
-                     while (i >= 0) {
-                         document.setCharacterAttributes(i, word.length(), keyword, false);
-                         i = text.indexOf(word, i + 1);
-                     }
-                 }
+//                 for (String word : keywords) {
+//                     int i =  text.indexOf(word);
+//                     while (i >= 0) {
+//                         document.setCharacterAttributes(i, word.length(), keyword, false);
+//                         i = text.indexOf(word, i + 1);
+//                     }
+//                 }
              } catch (BadLocationException e) {
                  e.printStackTrace();
              }
@@ -219,8 +223,26 @@ public class ScriptRunner extends JFrame {
          }
      }
 
+     private void setupHighlighter() {
+         highlightTimer = new Timer(200, e -> highlightKeyWords());
+         highlightTimer.setRepeats(false);
+
+         editor.getDocument().addDocumentListener(new DocumentListener() {
+             @Override
+             public void insertUpdate(DocumentEvent e) {resetHighlighterTimer();}
+             @Override
+             public void removeUpdate(DocumentEvent e) {resetHighlighterTimer();}
+             @Override
+             public void changedUpdate(DocumentEvent e) {}
+         });
+     }
+
+     private void resetHighlighterTimer() {
+         highlightTimer.restart();
+     }
+
      private void loadCustomFont(){
-         try (InputStream is = getClass().getResourceAsStream("/src/resources/fonts/JetBrainsMono-Regular.ttf")) {
+         try (InputStream is = getClass().getResourceAsStream("/fonts/JetBrainsMono-Regular.ttf")) {
              if (is == null) {
                  System.err.println("Could not load Font");
                  return;
