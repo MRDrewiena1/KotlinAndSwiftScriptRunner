@@ -13,7 +13,7 @@ Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Li
 - **Swing (GUI)**
 - **ProcessBuilder** for script execution
 - **StyledDocument** for efficient text highlighting
-- **Timer (debounced)** for keyword coloring
+- **Timer** for keyword coloring
 
 ---
 
