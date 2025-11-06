@@ -6,16 +6,6 @@ Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Li
 
 ---
 
-## Features
-
-**Script Editor** — type or paste Swift/Kotlin code in a syntax-highlighted editor.  
-**Live Output** — see output from the script in real time (as it executes).
-**Execution Indicator** — shows when the script is currently running.  
-**Exit Code Indicator** — displays whether the last run ended successfully.  
-**Lightweight Keyword Highlighting** — highlights up to 10 core language keywords efficiently.  
-**Language Switching** — switch between Swift and Kotlin at runtime.
-
----
 
 ## Technologies
 
