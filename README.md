@@ -42,7 +42,7 @@ import Darwin
 
 for i in 1...5 {
 
-print("Step \(i)")
+print("Step \\(i)")
 
 fflush(stdout)
 
