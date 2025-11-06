@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.ui.KeywordHighlighter;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -9,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,16 +26,12 @@ public class ScriptRunner extends JFrame {
      private final JLabel exitLabel = new JLabel("Exit Code: ");
 
      private Process runningProcess;
-     private Timer highlightTimer;
-
-     private final List<String> kotlinKeywords = List.of("func","let","var","if","else","for","while","return","class","import");
-     private final List<String> swiftKeywords = List.of("fun","val","var","if","else","for","while","return","class","import");
 
      public ScriptRunner() {
          super("KotlinAndSwiftScriptRunner");
 
          setLayout(new BorderLayout());
-         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                  new JScrollPane(editor),new JScrollPane(output));
          splitPane.setDividerLocation(450);
          add(splitPane, BorderLayout.CENTER);
@@ -48,11 +47,19 @@ public class ScriptRunner extends JFrame {
 
          output.setEditable(false);
          loadCustomFont();
-         setupHighlighter();
 
          runButton.addActionListener(e -> runScript());
          stopButton.addActionListener(e -> stopScript());
-         editor.getDocument().addDocumentListener((SimpleDocumentListener) e -> highlightKeyWords());
+
+         KeywordHighlighter highlighter = new KeywordHighlighter(editor,KeywordHighlighter.Language.KOTLIN);
+         langSelect.addActionListener(e -> {
+             String selectedLanguage = (String) langSelect.getSelectedItem();
+             if (selectedLanguage.equals("Kotlin")) {
+                 highlighter.setLanguage(KeywordHighlighter.Language.KOTLIN);
+             }else {
+                 highlighter.setLanguage(KeywordHighlighter.Language.SWIFT);
+             }
+         });
 
          setSize(900,600);
          setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -66,7 +73,8 @@ public class ScriptRunner extends JFrame {
          }
          String code = editor.getText();
          String language = (String) langSelect.getSelectedItem();
-         try {
+         new Thread(()->{
+             try {
              Path tmpFile = Files.createTempFile("script", language.equals("Kotlin") ? ".kts" : ".swift");
              Files.writeString(tmpFile, code);
 
@@ -85,31 +93,41 @@ public class ScriptRunner extends JFrame {
              exitLabel.setForeground(Color.BLACK);
              output.setText("");
 
-             new Thread(()->{
-                 try (BufferedReader br = new BufferedReader(
-                         new InputStreamReader(runningProcess.getInputStream()))) {
-                     String line;
-                     while ((line = br.readLine()) != null) {
-                         final String ln = line;
-                         SwingUtilities.invokeLater(()->{
-                             appendLineWithLinks(ln);
-                         });
+             Thread outputThread = new Thread(()->{
+                 try {
+                     BufferedReader reader = new BufferedReader(
+                             new InputStreamReader(runningProcess.getInputStream(), StandardCharsets.UTF_8));
+                     char[] buffer = new char[256];
+                     int n;
+                     while ((n = reader.read(buffer)) != -1){
+                         String s = new String(buffer,0,n);
+                         SwingUtilities.invokeLater(()->output.append(s));
                      }
-                     int exitCode = runningProcess.waitFor();
-                     SwingUtilities.invokeLater(()->{
-                         statusLabel.setText("Idle");
-                         exitLabel.setText("Exit: "+exitCode);
-                         exitLabel.setForeground(exitCode == 0 ? Color.GREEN : Color.RED);
-                     });
                  } catch (IOException e) {
                      e.printStackTrace();
-                 } catch (InterruptedException e) {
-                     throw new RuntimeException(e);
                  }
+             });
+             outputThread.start();
+
+             int exitCode = runningProcess.waitFor();
+             outputThread.join();
+
+             SwingUtilities.invokeLater(()->{
+                 statusLabel.setText("Idle");
+                 exitLabel.setText("Exit: "+exitCode);
+                 exitLabel.setForeground(exitCode == 0 ? Color.GREEN : Color.RED);
+             });
+
+             } catch (InterruptedException e) {
+                 Thread.currentThread().interrupt();
+                 throw new RuntimeException(e);
+             }catch (IOException e) {
+                 output.setText("Error: " + e.getMessage());
+             } finally {
+                 runningProcess = null;
+             }
              }).start();
-         } catch (IOException e) {
-             output.setText("Error: " + e.getMessage());
-         }
+
      }
 
      private void stopScript() {
@@ -117,128 +135,6 @@ public class ScriptRunner extends JFrame {
              runningProcess.destroy();
              statusLabel.setText("Stopped");
          }
-     }
-
-     private void highlightKeyWords() {
-         SwingUtilities.invokeLater(()->{
-             try {
-                 StyledDocument document = editor.getStyledDocument();
-                 StyleContext context = StyleContext.getDefaultStyleContext();
-                 AttributeSet normal = context.addAttribute(
-                         SimpleAttributeSet.EMPTY,
-                         StyleConstants.Foreground,
-                         Color.BLACK
-                 );
-                 AttributeSet keyword = context.addAttribute(
-                         SimpleAttributeSet.EMPTY,
-                         StyleConstants.Foreground,
-                         Color.ORANGE
-                 );
-
-                 document.setCharacterAttributes(0, document.getLength(), normal, true);
-
-                 List<String> keywords = langSelect.getSelectedItem()
-                         .equals("Kotlin") ? kotlinKeywords : swiftKeywords;
-                 String text = editor.getText(0,document.getLength());
-//                 for (String word : keywords) {
-//                     int i =  text.indexOf(word);
-//                     while (i >= 0) {
-//                         document.setCharacterAttributes(i, word.length(), keyword, false);
-//                         i = text.indexOf(word, i + 1);
-//                     }
-//                 }
-             } catch (BadLocationException e) {
-                 e.printStackTrace();
-             }
-         });
-     }
-
-     private void appendLineWithLinks(String line) {
-         if(line.matches(".*:\\d+:\\d+: error:.*")){
-             output.append(line+"\n");
-             output.setCaretPosition(output.getDocument().getLength());
-
-             int lineNum = extractLineNumber(line);
-             if(lineNum > 0){
-                 JButton link = new JButton(" Go to line "+lineNum);
-                 link.setFont(new Font("Monospaced", Font.BOLD, 12));
-                 link.setForeground(Color.RED);
-                 link.addActionListener(e -> {
-                     try {
-                         int start = editor.getDocument()
-                                 .getDefaultRootElement()
-                                 .getElement(lineNum-1)
-                                 .getStartOffset();
-                         editor.requestFocus();
-                         editor.setCaretPosition(start);
-                         highlightLine(lineNum);
-                     }catch (Exception ex) {
-                         JOptionPane.showMessageDialog(
-                                 this, "Line not found: "+lineNum,
-                                 "Error", JOptionPane.ERROR_MESSAGE
-                         );
-                     }
-                 });
-                 output.append("  ");
-                 output.insert("Click the link above. \n", output.getCaretPosition());
-             }
-         } else  {
-             output.append(line+"\n");
-         }
-     }
-
-     private int extractLineNumber(String line) {
-         try {
-             String[] parts = line.split(":");
-             return Integer.parseInt(parts[1]);
-         } catch (Exception e) {
-             return -1;
-         }
-     }
-
-     private void highlightLine(int lineNum) {
-         try {
-             int start = editor.getDocument()
-                     .getDefaultRootElement()
-                     .getElement(lineNum-1).getStartOffset();
-             int end = editor.getDocument()
-                     .getDefaultRootElement()
-                     .getElement(lineNum-1).getEndOffset();
-
-             editor.getHighlighter().removeAllHighlights();
-             editor.getHighlighter().addHighlight(start,end,
-                     new DefaultHighlighter.DefaultHighlightPainter(Color.RED));
-
-             new Thread(()->{
-                 try {
-                     Thread.sleep(1000);
-                     SwingUtilities.invokeLater(()->editor.getHighlighter().removeAllHighlights());
-                 } catch (InterruptedException e) {
-                     e.printStackTrace();
-                 }
-             }).start();
-
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     }
-
-     private void setupHighlighter() {
-         highlightTimer = new Timer(200, e -> highlightKeyWords());
-         highlightTimer.setRepeats(false);
-
-         editor.getDocument().addDocumentListener(new DocumentListener() {
-             @Override
-             public void insertUpdate(DocumentEvent e) {resetHighlighterTimer();}
-             @Override
-             public void removeUpdate(DocumentEvent e) {resetHighlighterTimer();}
-             @Override
-             public void changedUpdate(DocumentEvent e) {}
-         });
-     }
-
-     private void resetHighlighterTimer() {
-         highlightTimer.restart();
      }
 
      private void loadCustomFont(){
