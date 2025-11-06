@@ -3,8 +3,6 @@ package main.java;
 import main.java.ui.KeywordHighlighter;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.io.BufferedReader;
@@ -14,7 +12,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 public class ScriptRunner extends JFrame {
      private final JTextPane editor = new JTextPane();
@@ -162,12 +159,5 @@ public class ScriptRunner extends JFrame {
 
      public static void main(String[] args) {
          SwingUtilities.invokeLater(ScriptRunner::new);
-     }
-
-     interface SimpleDocumentListener extends DocumentListener {
-         void update(DocumentEvent e);
-         default void changedUpdate(DocumentEvent e) { update(e);}
-         default void insertUpdate(DocumentEvent e) { update(e);}
-         default void removeUpdate(DocumentEvent e) { update(e);}
      }
 }
