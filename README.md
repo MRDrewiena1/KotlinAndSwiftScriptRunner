@@ -41,35 +41,54 @@ IntelliJ IDEA:
 import Darwin
 
 for i in 1...5 {
+
 print("Step \(i)")
+
 fflush(stdout)
+
 sleep(1)
+
 }
+
 print("Done!")
 
-### Output (live updating):
+**Output (live updating):**
 
 Step 1
+
 Step 2
+
 Step 3
+
 Step 4
+
 Step 5
+
 Done!
 
 ### Example Kotlin Script
 for (i in 1..5) {
+
 println("Step $i")
+
 Thread.sleep(1000)
+
 }
+
 println("Done!")
 
-### Output (live updating):
+**Output (live updating):**
 
 Step 1
+
 Step 2
+
 Step 3
+
 Step 4
+
 Step 5
+
 Done!
 
 ### Created by Konrad Drewnowski
