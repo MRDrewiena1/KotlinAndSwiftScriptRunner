@@ -1,9 +1,7 @@
 package main.java.ui;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Highlighter;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,14 +11,12 @@ import java.util.regex.Pattern;
 public class ErrorLinkHandler {
 
     private static final Pattern errorPattern =
-        Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(error|warning):.*", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("(.+?):(\\d+):(\\d+):\\s*(error):.*", Pattern.CASE_INSENSITIVE);
 
     private final JTextPane editorPane;
     private final JTextArea outputPane;
 
-    private Object currenthighlighter;
-    private final Highlighter.HighlightPainter highlightPainter =
-            new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
+    private Object lastHighlight = null;
 
     public ErrorLinkHandler(JTextPane editorPane,JTextArea outputPane) {
         this.editorPane = editorPane;
@@ -36,7 +32,7 @@ public class ErrorLinkHandler {
         editorPane.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e){
-                clearHighlight();
+                clearUnderline();
             }
         });
     }
@@ -94,30 +90,32 @@ public class ErrorLinkHandler {
             end = text.length();
         }
 
-        editorPane.requestFocusInWindow();
+        underlineError(start,end);
+
+        editorPane.requestFocus();
         editorPane.setCaretPosition(targetOffset);
         editorPane.getCaret().setSelectionVisible(true);
-
-        highlightError(start,end);
     }
 
-    private void highlightError(int start,int end){
+    private void underlineError(int start, int end){
+
+        Highlighter highlighter = editorPane.getHighlighter();
+        Color color = Color.RED;
+        clearUnderline();
+        Highlighter.HighlightPainter painter = new UnderlineHighlighter(color);
         try {
-            Highlighter highlighter = editorPane.getHighlighter();
-            clearHighlight();
-            currenthighlighter = highlighter
-                    .addHighlight(start, end, highlightPainter);
-        }catch (BadLocationException e){
-            e.printStackTrace();
+            lastHighlight = highlighter.addHighlight(start,end,painter);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
-    private void clearHighlight(){
-        if(currenthighlighter!=null){
-            editorPane.getHighlighter().removeHighlight(currenthighlighter);
-            currenthighlighter = null;
+    private void clearUnderline(){
+
+        if(lastHighlight != null){
+            editorPane.getHighlighter().removeHighlight(lastHighlight);
+            lastHighlight = null;
         }
     }
-
-
 }
