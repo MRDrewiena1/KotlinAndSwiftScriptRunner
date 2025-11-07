@@ -39,6 +39,7 @@ public class ScriptRunner extends JFrame {
          topControlsPanel.add(runButton);
          topControlsPanel.add(stopButton);
          topControlsPanel.add(statusLabel);
+         topControlsPanel.add(Box.createHorizontalStrut(240));
          topControlsPanel.add(exitLabel);
          add(topControlsPanel, BorderLayout.NORTH);
 

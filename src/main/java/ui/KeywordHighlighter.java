@@ -22,7 +22,6 @@ public class KeywordHighlighter {
     private final JTextPane textPane;
     private final java.util.Timer timer = new Timer();
     private TimerTask pendingTask;
-    private Language language;
     private Pattern currentPattern;
 
     private static final String[] KOTLIN_KEYWORDS = {
@@ -35,7 +34,6 @@ public class KeywordHighlighter {
 
     public KeywordHighlighter(JTextPane textPane, Language language) {
         this.textPane = textPane;
-        this.language = language;
         this.currentPattern = buildPatternFor(language);
 
         textPane.getDocument().addDocumentListener(new DocumentListener() {
@@ -58,7 +56,6 @@ public class KeywordHighlighter {
     }
 
     public void setLanguage(Language language) {
-        this.language = language;
         this.currentPattern = buildPatternFor(language);
         highlight();
     }
