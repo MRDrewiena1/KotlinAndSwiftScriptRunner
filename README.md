@@ -4,7 +4,7 @@
 A lightweight desktop tool that lets you **edit, run and debug Swift or Kotlin scripts** with live output and syntax highlighting.  
 Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Linux).
 
----
+
 
 
 ## Technologies
@@ -15,7 +15,7 @@ Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Li
 - **StyledDocument** for efficient text highlighting
 - **Timer** for keyword coloring
 
----
+
 ## Requirements
 **Java** : 17 or higher
 
