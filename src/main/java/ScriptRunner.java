@@ -1,5 +1,6 @@
 package main.java;
 
+import main.java.ui.ErrorLinkHandler;
 import main.java.ui.KeywordHighlighter;
 
 import javax.swing.*;
@@ -33,6 +34,7 @@ public class ScriptRunner extends JFrame {
          splitPane.setDividerLocation(450);
          add(splitPane, BorderLayout.CENTER);
 
+
          JPanel topControlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
          topControlsPanel.add(new JLabel("Language:"));
          topControlsPanel.add(langSelect);
@@ -50,6 +52,8 @@ public class ScriptRunner extends JFrame {
          stopButton.addActionListener(e -> stopScript());
 
          KeywordHighlighter highlighter = new KeywordHighlighter(editor,KeywordHighlighter.Language.KOTLIN);
+         ErrorLinkHandler errorLinkHandler = new ErrorLinkHandler(editor,output);
+
          langSelect.addActionListener(e -> {
              String selectedLanguage = (String) langSelect.getSelectedItem();
              if (selectedLanguage.equals("Kotlin")) {
@@ -99,7 +103,7 @@ public class ScriptRunner extends JFrame {
                      int n;
                      while ((n = reader.read(buffer)) != -1){
                          String s = new String(buffer,0,n);
-                         SwingUtilities.invokeLater(()->output.append(s));
+                         SwingUtilities.invokeLater(()->output.append(s + "\n"));
                      }
                  } catch (IOException e) {
                      e.printStackTrace();
@@ -152,6 +156,7 @@ public class ScriptRunner extends JFrame {
              langSelect.setFont(customFont);
              runButton.setFont(customFont.deriveFont(Font.BOLD,13f));
              stopButton.setFont(customFont.deriveFont(Font.BOLD,13f));
+
 
          } catch (Exception e) {
              e.printStackTrace();
