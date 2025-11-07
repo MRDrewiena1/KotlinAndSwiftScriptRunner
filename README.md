@@ -1,19 +1,8 @@
 # KotlinAndSwiftScriptRunner
 # Script Runner GUI
 
-A lightweight desktop tool that lets you **edit, run and debug Swift or Kotlin scripts** with live output and syntax highlighting.  
+A lightweight desktop tool that lets you **edit, run and debug Swift or Kotlin scripts** with live output, errors(clickable error lines in output) and syntax highlighting.  
 Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Linux).
-
-
-
-
-## Technologies
-
-- **Java 17+**
-- **Swing (GUI)**
-- **ProcessBuilder** for script execution
-- **StyledDocument** for efficient text highlighting
-- **Timer** for keyword coloring
 
 
 ## Requirements
