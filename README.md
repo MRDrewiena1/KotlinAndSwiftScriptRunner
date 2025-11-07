@@ -1,19 +1,8 @@
 # KotlinAndSwiftScriptRunner
 # Script Runner GUI
 
-A lightweight desktop tool that lets you **edit, run and debug Swift or Kotlin scripts** with live output and syntax highlighting.  
+A lightweight desktop tool that lets you **edit, run and debug Swift or Kotlin scripts** with live output, errors(clickable error lines in output) and syntax highlighting.  
 Built with **Java + Swing**, designed for cross-platform use (macOS, Windows, Linux).
-
-
-
-
-## Technologies
-
-- **Java 17+**
-- **Swing (GUI)**
-- **ProcessBuilder** for script execution
-- **StyledDocument** for efficient text highlighting
-- **Timer** for keyword coloring
 
 
 ## Requirements
@@ -36,6 +25,30 @@ The KotlinAndSwiftScriptRunner window should appear.
 
 Select the language (Kotlin/Swift), type in the script, and click **Run**
 
+### Example Kotlin Script
+for (i in 1..5) {
+
+println("Step $i")
+
+Thread.sleep(1000)
+
+}
+
+println("Done!")
+
+**Output (live updating):**
+
+Step 1
+
+Step 2
+
+Step 3
+
+Step 4
+
+Step 5
+
+Done!
 
 ### Example Swift Script
 
@@ -67,29 +80,5 @@ Step 5
 
 Done!
 
-### Example Kotlin Script
-for (i in 1..5) {
-
-println("Step $i")
-
-Thread.sleep(1000)
-
-}
-
-println("Done!")
-
-**Output (live updating):**
-
-Step 1
-
-Step 2
-
-Step 3
-
-Step 4
-
-Step 5
-
-Done!
 
 ### Created by Konrad Drewnowski
