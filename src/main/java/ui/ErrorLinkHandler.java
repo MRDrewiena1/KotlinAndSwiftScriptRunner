@@ -111,7 +111,7 @@ public class ErrorLinkHandler {
 
     }
 
-    private void clearUnderline(){
+    public void clearUnderline(){
 
         if(lastHighlight != null){
             editorPane.getHighlighter().removeHighlight(lastHighlight);

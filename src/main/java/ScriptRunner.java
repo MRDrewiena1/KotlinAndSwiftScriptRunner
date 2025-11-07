@@ -22,6 +22,7 @@ public class ScriptRunner extends JFrame {
      private final JButton stopButton = new JButton("Stop");
      private final JLabel statusLabel = new JLabel("Idle");
      private final JLabel exitLabel = new JLabel("Exit Code: ");
+     private ErrorLinkHandler errorLinkHandler = new ErrorLinkHandler(editor,output);
 
      private Process runningProcess;
 
@@ -52,7 +53,6 @@ public class ScriptRunner extends JFrame {
          stopButton.addActionListener(e -> stopScript());
 
          KeywordHighlighter highlighter = new KeywordHighlighter(editor,KeywordHighlighter.Language.KOTLIN);
-         ErrorLinkHandler errorLinkHandler = new ErrorLinkHandler(editor,output);
 
          langSelect.addActionListener(e -> {
              String selectedLanguage = (String) langSelect.getSelectedItem();
@@ -69,6 +69,9 @@ public class ScriptRunner extends JFrame {
      }
 
      private void runScript() {
+
+         errorLinkHandler.clearUnderline();
+
          if(runningProcess != null && runningProcess.isAlive()) {
              JOptionPane.showMessageDialog(this, "Process already running!!!");
              return;
